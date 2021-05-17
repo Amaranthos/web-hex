@@ -1,9 +1,14 @@
 import { OrbitControls, PerspectiveCamera } from "@react-three/drei";
 import { Canvas } from "@react-three/fiber";
 import { Hex } from "components";
+import { useGrid } from "hooks";
 import React from "react";
 
-function App() {
+const sqrt3 = Math.sqrt(3.0);
+
+export function App() {
+  const { grid } = useGrid();
+
   return (
     <Canvas>
       <color attach="background" args={["#171720"]} />
@@ -15,13 +20,18 @@ function App() {
         position={[0, 0, 20]}
       />
       <OrbitControls />
-      <Hex position={[2, 0, 0]} />
-      <Hex position={[0, 0, 0]} />
-      <Hex position={[-2, 0, 0]} />
+      {grid.map((tile) => {
+        return (
+          <Hex
+            key={`${tile.x}${tile.y}${tile.z}`}
+            position={[
+              sqrt3 * (tile.x + tile.y / 2.0),
+              (3.0 / 2.0) * tile.y,
+              0,
+            ]}
+          />
+        );
+      })}
     </Canvas>
   );
 }
-
-function useGrid() {}
-
-export { App };
