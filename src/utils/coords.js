@@ -1,3 +1,5 @@
+import { sqrt3 } from "./constants";
+
 export function CubeCoord(x, y, z) {
   this.x = x;
   this.y = y;
@@ -8,6 +10,10 @@ export function CubeCoord(x, y, z) {
       row: this.x,
       col: this.z + (this.x + (this.x & 1)) / 2,
     });
+  };
+
+  this.toPhysXY = function () {
+    return [sqrt3 * (this.x + this.y / 2.0), (3.0 / 2.0) * this.y];
   };
 }
 

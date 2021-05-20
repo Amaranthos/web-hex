@@ -1,37 +1,54 @@
 import { OrbitControls, PerspectiveCamera } from "@react-three/drei";
-import { Canvas } from "@react-three/fiber";
-import { Hex } from "components";
-import { useGrid } from "hooks";
-import React from "react";
-
-const sqrt3 = Math.sqrt(3.0);
+import { Canvas, useFrame } from "@react-three/fiber";
+import { Dot, Hex } from "components";
+import { GridProvider, useGrid, usePlayer } from "hooks";
+import React, { useCallback } from "react";
 
 export function App() {
-  const { grid } = useGrid();
-
   return (
     <Canvas>
-      <color attach="background" args={["#171720"]} />
-      <ambientLight />
-      <pointLight position={[10, 10, 10]} />
-      <PerspectiveCamera
-        makeDefault
-        args={[75, 16 / 9, 0.1, 1000]}
-        position={[0, 0, 20]}
-      />
-      <OrbitControls />
-      {grid.map((tile) => {
+      <GridProvider>
+        <color attach="background" args={["#171720"]} />
+        <ambientLight />
+        <PerspectiveCamera
+          makeDefault
+          args={[75, 16 / 9, 0.1, 1000]}
+          position={[0, 0, 20]}
+        />
+        <OrbitControls />
+        <World />
+      </GridProvider>
+    </Canvas>
+  );
+}
+
+function World() {
+  const { grid } = useGrid();
+  const { position, moveTo } = usePlayer();
+  const worldPosition = React.useRef(position.toPhysXY());
+
+  const movePlayer = useCallback((coord) => {
+    console.log(coord);
+    moveTo(coord);
+  }, []);
+
+  useFrame(() => {
+    const direction = worldPosition.current - position.toPhysXY();
+  });
+
+  return (
+    <>
+      {grid.map((coords) => {
         return (
           <Hex
-            key={`${tile.x}${tile.y}${tile.z}`}
-            position={[
-              sqrt3 * (tile.x + tile.y / 2.0),
-              (3.0 / 2.0) * tile.y,
-              0,
-            ]}
+            key={`${coords.x}${coords.y}${coords.z}`}
+            position={[...coords.toPhysXY(), 0]}
+            onClick={() => movePlayer(coords)}
+            coords={coords}
           />
         );
       })}
-    </Canvas>
+      <Dot position={[...position.toPhysXY(), 0.55]} />
+    </>
   );
 }
