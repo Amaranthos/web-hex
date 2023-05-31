@@ -1,3 +1,4 @@
+import { Vector2 } from "three";
 import { sqrt3 } from "./constants";
 
 export function CubeCoord(x, y, z) {

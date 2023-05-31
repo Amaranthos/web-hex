@@ -2,7 +2,8 @@ import { OrbitControls, PerspectiveCamera } from "@react-three/drei";
 import { Canvas, useFrame } from "@react-three/fiber";
 import { Dot, Hex } from "components";
 import { GridProvider, useGrid, usePlayer } from "hooks";
-import React, { useCallback } from "react";
+import React, { useCallback, useRef } from "react";
+import { Vector2, Vector3 } from "three";
 
 export function App() {
   return (
@@ -25,15 +26,21 @@ export function App() {
 function World() {
   const { grid } = useGrid();
   const { position, moveTo } = usePlayer();
-  const worldPosition = React.useRef(position.toPhysXY());
+  const dotRef = useRef();
 
   const movePlayer = useCallback((coord) => {
-    console.log(coord);
     moveTo(coord);
   }, []);
 
-  useFrame(() => {
-    const direction = worldPosition.current - position.toPhysXY();
+  useFrame(({ clock }) => {
+    if (dotRef.current) {
+      const targetPos = new Vector3(...position.toPhysXY(), 0.01);
+      const currentPos = dotRef.current.position;
+
+      if (!targetPos.equals(currentPos)) {
+        currentPos.lerp(targetPos, 0.1);
+      }
+    }
   });
 
   return (
@@ -48,7 +55,7 @@ function World() {
           />
         );
       })}
-      <Dot position={[...position.toPhysXY(), 0.55]} />
+      <Dot ref={dotRef} position={[0, 0, 0.01]} />
     </>
   );
 }
